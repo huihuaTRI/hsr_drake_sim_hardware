@@ -1,0 +1,73 @@
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+joint_trajectory_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - base_r_drive_wheel_joint
+    - base_l_drive_wheel_joint
+    - base_roll_joint
+    - head_pan_joint
+    - head_tilt_joint
+    - arm_lift_joint
+    - arm_flex_joint
+    - arm_roll_joint
+    - wrist_flex_joint
+    - wrist_roll_joint
+    - hand_motor_joint
+    - hand_l_spring_proximal_joint
+    - hand_r_spring_proximal_joint
+  gains:
+    base_r_drive_wheel_joint:
+      p: 100
+      i: 0
+      d: 0
+    base_l_drive_wheel_joint:
+      p: 100
+      i: 0
+      d: 0
+    base_roll_joint:
+      p: 100
+      i: 0
+      d: 0
+    head_pan_joint:
+      p: 100
+      i: 0
+      d: 0
+    head_tilt_joint:
+      p: 100
+      i: 0
+      d: 0
+    arm_lift_joint:
+      p: 100
+      i: 1
+      d: 0
+    arm_flex_joint:
+      p: 100
+      i: 0
+      d: 0
+    arm_roll_joint:
+      p: 100
+      i: 0
+      d: 0
+    wrist_flex_joint:
+      p: 100
+      i: 0
+      d: 0
+    wrist_roll_joint:
+      p: 100
+      i: 0
+      d: 0
+    hand_motor_joint:
+      p: 100
+      i: 0
+      d: 0
+    hand_l_spring_proximal_joint:
+      p: 100
+      i: 0
+      d: 0
+    hand_r_spring_proximal_joint:
+      p: 100
+      i: 0
+      d: 0

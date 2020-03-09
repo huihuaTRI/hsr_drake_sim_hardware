@@ -1,0 +1,20 @@
+<launch>
+    <arg name="use_drake_visualizer" default="false" />
+    <arg name="debug" default="false" />
+
+    <rosparam command="load" ns="/hsr" file="$(find hsr_drake_sim_hardware)/config/controller_config.yaml" />
+
+    <node name="jonint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">["hsr/joint_states"]</rosparam>
+    </node>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <node if="$(arg debug)" name="hsr_drake_sim_hardware" type="hsr_drake_sim_hardware" pkg="hsr_drake_sim_hardware" output="screen" launch-prefix="xterm -e gdb -ex run --args" />
+    <node unless="$(arg debug)" name="hsr_drake_sim_hardware" type="hsr_drake_sim_hardware" pkg="hsr_drake_sim_hardware" output="screen"/>
+
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        args="--namespace=/hsr --shutdown-timeout 1
+        joint_state_controller
+        joint_trajectory_controller" />
+</launch>
