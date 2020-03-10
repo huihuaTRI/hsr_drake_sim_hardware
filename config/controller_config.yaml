@@ -4,6 +4,7 @@ joint_state_controller:
 
 joint_trajectory_controller:
   type: effort_controllers/JointTrajectoryController
+  num_joints: 13
   joints:
     - base_r_drive_wheel_joint
     - base_l_drive_wheel_joint

@@ -1,6 +1,8 @@
 #include "ros/package.h"
 #include "ros/ros.h"
 
+#include <XmlRpcValue.h>
+
 #include "controller_manager/controller_manager.h"
 #include "hardware_interface/hardware_interface.h"
 #include "hardware_interface/joint_command_interface.h"
@@ -30,7 +32,7 @@ public:
   void HsrSimCommandPub();
 
 private:
-  const int num_joints_ = 1;
+  int num_joints_;
   std::vector<std::string> joint_names_;
   std::vector<double> positions_;
   std::vector<double> velocities_;
@@ -57,14 +59,35 @@ bool HsrDrakeSimHardware::init(ros::NodeHandle &root_nh,
       root_nh.subscribe("hsr_sim_status_channel", 1000,
                         &HsrDrakeSimHardware::HsrSimStatusCallBack, this));
 
-  // Register joint interfaces for ros-control
+  // Get ros parameter to initialize internal states.
+  root_nh.getParam("joint_trajectory_controller/num_joints", num_joints_);
   joint_names_.resize(num_joints_);
-  joint_names_[0] = "test";
   positions_.resize(num_joints_);
   velocities_.resize(num_joints_);
   efforts_.resize(num_joints_);
   commands_.resize(num_joints_);
+
+  XmlRpc::XmlRpcValue joint_params;
+  root_nh.getParam("joint_trajectory_controller", joint_params);
+  ROS_ASSERT(joint_params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+
+  for (XmlRpc::XmlRpcValue::ValueStruct::const_iterator it =
+           joint_params.begin();
+       it != joint_params.end(); ++it) {
+    if ((std::string)(it->first) == "joints") {
+      for (int i = 0; i < num_joints_; ++i) {
+        const std::string joint_name =
+            static_cast<std::string>(joint_params[it->first][i]);
+        ROS_INFO_STREAM("Joint name:" << joint_name);
+        joint_names_[i] = joint_name;
+      }
+      break;
+    }
+  }
+
+  // Register joint interfaces for ros-control
   for (int i = 0; i < num_joints_; ++i) {
+    ROS_ASSERT(joint_names_[i] != "");
     // Create a JointHandle for every joint
     hardware_interface::JointStateHandle state_handle(
         joint_names_[i], &positions_[i], &velocities_[i], &efforts_[i]);
@@ -97,7 +120,6 @@ void HsrDrakeSimHardware::HsrSimCommandPub() {
     msg.joint_position.push_back(0.0);
     msg.joint_velocity.push_back(0.0);
   }
-
   sim_command_pub_ptr_->publish(msg);
 }
 
