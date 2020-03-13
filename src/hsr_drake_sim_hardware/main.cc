@@ -60,7 +60,7 @@ bool HsrDrakeSimHardware::init(ros::NodeHandle &root_nh,
                         &HsrDrakeSimHardware::HsrSimStatusCallBack, this));
 
   // Get ros parameter to initialize internal states.
-  root_nh.getParam("joint_trajectory_controller/num_joints", num_joints_);
+  root_nh.getParam("hsr/joint_trajectory_controller/num_joints", num_joints_);
   joint_names_.resize(num_joints_);
   positions_.resize(num_joints_);
   velocities_.resize(num_joints_);
@@ -68,7 +68,7 @@ bool HsrDrakeSimHardware::init(ros::NodeHandle &root_nh,
   commands_.resize(num_joints_);
 
   XmlRpc::XmlRpcValue joint_params;
-  root_nh.getParam("joint_trajectory_controller", joint_params);
+  root_nh.getParam("hsr/joint_trajectory_controller", joint_params);
   ROS_ASSERT(joint_params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
 
   for (XmlRpc::XmlRpcValue::ValueStruct::const_iterator it =
@@ -115,8 +115,10 @@ void HsrDrakeSimHardware::HsrSimStatusCallBack(
 // Publish the commands from a ros-controller to the simulation
 void HsrDrakeSimHardware::HsrSimCommandPub() {
   lcm_to_ros::lcmt_hsr_sim_command msg;
+  msg.utime = 1;
   msg.num_joints = num_joints_;
   for (int i = 0; i < num_joints_; ++i) {
+    msg.joint_name.push_back(joint_names_[i]);
     msg.joint_position.push_back(0.0);
     msg.joint_velocity.push_back(0.0);
   }
@@ -128,7 +130,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "hsr_hardware");
 
   // Create a node handle
-  ros::NodeHandle nh("hsr");
+  ros::NodeHandle nh;
 
   // Initialize a hardware object
   HsrDrakeSimHardware hw;
